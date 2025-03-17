@@ -11,14 +11,29 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $users = User::when(request()->search, function ($users) {
-            $users = $users->where('name', 'like', '%' . request()->search . '%');
-        })->paginate(10);
-        return view('users.index', compact('users'))
-        ->with('i', (request()->input('page', 1) - 1) * 10);
+    public function index(Request $request)
+{
+    $query = User::query();
+
+    // Filter berdasarkan pencarian nama/email
+    if ($request->has('search') && $request->search != '') {
+        $query->where(function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%')
+              ->orWhere('email', 'like', '%' . $request->search . '%');
+        });
     }
+
+    // Filter berdasarkan role
+    if ($request->has('role') && $request->role != '') {
+        $query->where('roles', $request->role);
+    }
+
+    $users = $query->paginate(10);
+
+    return view('users.index', compact('users'))->with('i', (request()->input('page', 1) - 1) * 10);
+}
+
+    
 
     /**
      * Show the form for creating a new resource.
