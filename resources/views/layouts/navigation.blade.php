@@ -67,6 +67,11 @@
                             {{ __('Absensi') }}
                         </x-nav-link>
                     </div>
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('evaluasi_kinerja.index')" :active="request()->routeIs('evaluasi_kinerja.index')">
+                            {{ __('Evaluasi Kinerja') }}
+                        </x-nav-link>
+                    </div>
                 @elseif (Auth::user()->roles == 'user')
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">

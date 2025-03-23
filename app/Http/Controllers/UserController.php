@@ -12,26 +12,39 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-{
-    $query = User::query();
-
-    // Filter berdasarkan pencarian nama/email
-    if ($request->has('search') && $request->search != '') {
-        $query->where(function ($q) use ($request) {
-            $q->where('name', 'like', '%' . $request->search . '%')
-              ->orWhere('email', 'like', '%' . $request->search . '%');
-        });
+    {
+        // Validasi input
+        $request->validate([
+            'search' => 'nullable|string|max:255',
+            'role' => 'nullable|in:admin,user',
+        ]);
+    
+        // Inisialisasi query
+        $query = User::query();
+    
+        // Filter berdasarkan pencarian nama/email
+        if ($request->has('search') && $request->search != '') {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+    
+        // Filter berdasarkan role
+        if ($request->has('role') && $request->role != '') {
+            $query->where('roles', $request->role);
+        }
+    
+        // Paginasi hasil query
+        $users = $query->paginate(10)->appends(request()->query());
+    
+        // Kirim data ke view
+        return view('users.index', compact('users'))->with([
+            'i' => (request()->input('page', 1) - 1) * 10,
+            'search' => $request->search,
+            'role' => $request->role,
+        ]);
     }
-
-    // Filter berdasarkan role
-    if ($request->has('role') && $request->role != '') {
-        $query->where('roles', $request->role);
-    }
-
-    $users = $query->paginate(10);
-
-    return view('users.index', compact('users'))->with('i', (request()->input('page', 1) - 1) * 10);
-}
 
     
 

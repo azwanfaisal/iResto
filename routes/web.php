@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EvaluasiKinerjaController;
 use App\Http\Controllers\JadwalKerjaController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LaporanController;
@@ -32,6 +33,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('laporans', LaporanController::class);
     Route::resource('penggajians', PenggajianController::class);
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+    Route::resource('evaluasi_kinerja', EvaluasiKinerjaController::class);
+    
 
 
 });
