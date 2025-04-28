@@ -31,6 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/absensi/checkout', [AbsensiController::class, 'checkout'])->name('absensi.checkout');
     Route::resource('penggajian', PenggajianController::class);
     Route::resource('laporans', LaporanController::class);
+    Route::get('laporans/{laporan}/download', [LaporanController::class, 'download'])
+    ->name('laporans.download');
     Route::resource('penggajians', PenggajianController::class);
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::resource('evaluasi_kinerja', EvaluasiKinerjaController::class);

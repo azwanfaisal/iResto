@@ -8,133 +8,83 @@ use Illuminate\Http\Request;
 
 class PenggajianController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        // Ambil data penggajian dengan relasi karyawan dan pagination
-        $penggajians = Penggajian::with('karyawan')->latest()->paginate(10);
-
-        // Tampilkan view index dengan data penggajian
+        $penggajians = Penggajian::with('karyawan')->paginate(10);
         return view('penggajians.index', compact('penggajians'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        // Ambil data karyawan untuk dropdown
         $karyawans = Karyawan::all();
-
-        // Tampilkan form untuk membuat penggajian baru
         return view('penggajians.create', compact('karyawans'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // Validasi input
-        $request->validate([
+        $validated = $request->validate([
             'karyawan_id' => 'required|exists:karyawans,id',
             'gaji_pokok' => 'required|numeric|min:0',
-            'tunjangan_transport' => 'nullable|numeric|min:0',
-            'tunjangan_makan' => 'nullable|numeric|min:0',
-            'tunjangan_lembur' => 'nullable|numeric|min:0',
-            'potongan' => 'nullable|numeric|min:0',
+            'tunjangan_transport' => 'required|numeric|min:0',
+            'tunjangan_makan' => 'required|numeric|min:0',
+            'tunjangan_lembur' => 'required|numeric|min:0',
+            'potongan' => 'required|numeric|min:0',
             'tanggal_gajian' => 'required|date',
         ]);
 
-        // Hitung total gaji
-        $total_gaji = $request->gaji_pokok + $request->tunjangan_transport + $request->tunjangan_makan + $request->tunjangan_lembur - $request->potongan;
-
-        // Simpan data penggajian ke database
-        Penggajian::create([
-            'karyawan_id' => $request->karyawan_id,
-            'gaji_pokok' => $request->gaji_pokok,
-            'tunjangan_transport' => $request->tunjangan_transport,
-            'tunjangan_makan' => $request->tunjangan_makan,
-            'tunjangan_lembur' => $request->tunjangan_lembur,
-            'potongan' => $request->potongan,
-            'total_gaji' => $total_gaji,
-            'tanggal_gajian' => $request->tanggal_gajian,
-        ]);
-
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('penggajians.index')
-                         ->with('success', 'Penggajian berhasil dibuat.');
+        try {
+            $penggajian = new Penggajian($validated);
+            $penggajian->save();
+            
+            return redirect()->route('penggajians.index')
+                ->with('success', 'Data penggajian berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Penggajian $penggajian)
+    public function edit($id)
     {
-        // Tampilkan detail penggajian
-        return view('penggajians.show', compact('penggajian'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Penggajian $penggajian)
-    {
-        // Ambil data karyawan untuk dropdown
+        $penggajian = Penggajian::findOrFail($id);
         $karyawans = Karyawan::all();
-
-        // Tampilkan form untuk mengedit penggajian
         return view('penggajians.edit', compact('penggajian', 'karyawans'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Penggajian $penggajian)
+    public function update(Request $request, $id)
     {
-        // Validasi input
-        $request->validate([
+        $validated = $request->validate([
             'karyawan_id' => 'required|exists:karyawans,id',
             'gaji_pokok' => 'required|numeric|min:0',
-            'tunjangan_transport' => 'nullable|numeric|min:0',
-            'tunjangan_makan' => 'nullable|numeric|min:0',
-            'tunjangan_lembur' => 'nullable|numeric|min:0',
-            'potongan' => 'nullable|numeric|min:0',
+            'tunjangan_transport' => 'required|numeric|min:0',
+            'tunjangan_makan' => 'required|numeric|min:0',
+            'tunjangan_lembur' => 'required|numeric|min:0',
+            'potongan' => 'required|numeric|min:0',
             'tanggal_gajian' => 'required|date',
         ]);
 
-        // Hitung total gaji
-        $total_gaji = $request->gaji_pokok + $request->tunjangan_transport + $request->tunjangan_makan + $request->tunjangan_lembur - $request->potongan;
-
-        // Update data penggajian
-        $penggajian->update([
-            'karyawan_id' => $request->karyawan_id,
-            'gaji_pokok' => $request->gaji_pokok,
-            'tunjangan_transport' => $request->tunjangan_transport,
-            'tunjangan_makan' => $request->tunjangan_makan,
-            'tunjangan_lembur' => $request->tunjangan_lembur,
-            'potongan' => $request->potongan,
-            'total_gaji' => $total_gaji,
-            'tanggal_gajian' => $request->tanggal_gajian,
-        ]);
-
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('penggajians.index')
-                         ->with('success', 'Penggajian berhasil diperbarui.');
+        try {
+            $penggajian = Penggajian::findOrFail($id);
+            $penggajian->update($validated);
+            
+            return redirect()->route('penggajians.index')
+                ->with('success', 'Data penggajian berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Penggajian $penggajian)
+    public function destroy($id)
     {
-        // Hapus data penggajian
-        $penggajian->delete();
-
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('penggajians.index')
-                         ->with('success', 'Penggajian berhasil dihapus.');
+        try {
+            $penggajian = Penggajian::findOrFail($id);
+            $penggajian->delete();
+            
+            return redirect()->route('penggajians.index')
+                ->with('success', 'Data penggajian berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+        }
     }
 }

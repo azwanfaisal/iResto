@@ -9,16 +9,16 @@ use App\Models\Karyawan;
 class JadwalKerjaController extends Controller
 {
     /**
-     * Tampilkan daftar jadwal kerja.
+     * Display a listing of the resource.
      */
     public function index()
     {
         $jadwalKerja = JadwalKerja::with('karyawan')->paginate(10);
-        return view('jadwalkerja.index', compact('jadwalKerja')); // ✅ Perbaiki variabel
+        return view('jadwalkerja.index', compact('jadwalKerja'));
     }
 
     /**
-     * Tampilkan form tambah jadwal kerja.
+     * Show the form for creating a new resource.
      */
     public function create()
     {
@@ -27,7 +27,7 @@ class JadwalKerjaController extends Controller
     }
 
     /**
-     * Simpan data jadwal kerja baru.
+     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
@@ -41,28 +41,26 @@ class JadwalKerjaController extends Controller
     
         try {
             JadwalKerja::create($request->all());
-    
             return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal kerja berhasil ditambahkan.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menambahkan jadwal kerja: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menambahkan jadwal kerja: ' . $e->getMessage());
         }
     }
-    
-
 
     /**
-     * Tampilkan form edit jadwal kerja.
+     * Show the form for editing the specified resource.
      */
-    public function edit(JadwalKerja $jadwalKerja)
+    public function edit($id)
     {
+        $jadwal = JadwalKerja::findOrFail($id);
         $karyawans = Karyawan::all();
-        return view('jadwalkerja.edit', compact('jadwalKerja', 'karyawans'));
+        return view('jadwalkerja.edit', compact('jadwal', 'karyawans'));
     }
 
     /**
-     * Update data jadwal kerja.
+     * Update the specified resource in storage.
      */
-    public function update(Request $request, JadwalKerja $jadwalKerja)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'karyawan_id' => 'required|exists:karyawans,id',
@@ -73,31 +71,25 @@ class JadwalKerjaController extends Controller
         ]);
 
         try {
-            $jadwalKerja->update($request->all());
+            $jadwal = JadwalKerja::findOrFail($id);
+            $jadwal->update($request->all());
             return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal kerja berhasil diperbarui.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui jadwal kerja: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal memperbarui jadwal kerja: ' . $e->getMessage());
         }
     }
 
     /**
-     * Hapus jadwal kerja.
+     * Remove the specified resource from storage.
      */
     public function destroy($id)
-{
-    $jadwalKerja = JadwalKerja::find($id);
-    
-    if (!$jadwalKerja) {
-        return redirect()->route('jadwalkerja.index')->with('error', 'Data tidak ditemukan.');
+    {
+        try {
+            $jadwal = JadwalKerja::findOrFail($id);
+            $jadwal->delete();
+            return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal kerja berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus jadwal kerja: ' . $e->getMessage());
+        }
     }
-
-    try {
-        $jadwalKerja->delete();
-        return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal kerja berhasil dihapus.');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Gagal menghapus jadwal kerja: ' . $e->getMessage());
-    }
-}
-
-    
 }

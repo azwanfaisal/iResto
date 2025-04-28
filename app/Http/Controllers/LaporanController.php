@@ -4,106 +4,107 @@ namespace App\Http\Controllers;
 
 use App\Models\Laporan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class LaporanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        // Ambil data laporan dengan pagination
         $laporans = Laporan::latest()->paginate(10);
-
-        // Tampilkan view index dengan data laporan
         return view('laporans.index', compact('laporans'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        // Tampilkan form untuk membuat laporan baru
         return view('laporans.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // Validasi input
-        $request->validate([
+        $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'jenis_laporan' => 'required|in:kehadiran,penggajian,kinerja',
             'periode_awal' => 'required|date',
             'periode_akhir' => 'required|date|after_or_equal:periode_awal',
             'format' => 'required|in:PDF,Excel,CSV',
-            'file_path' => 'nullable|string',
+            'file' => 'nullable|file|mimes:pdf,xlsx,csv|max:2048',
         ]);
 
-        // Simpan data laporan ke database
-        Laporan::create($request->all());
+        try {
+            if ($request->hasFile('file')) {
+                $validated['file_path'] = $request->file('file')->store('laporan_files');
+            }
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('laporans.index')
-                         ->with('success', 'Laporan berhasil dibuat.');
+            Laporan::create($validated);
+
+            return redirect()->route('laporans.index')
+                ->with('success', 'Laporan berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->with('error', 'Gagal menambahkan laporan: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Laporan $laporan)
-    {
-        // Tampilkan detail laporan
-        return view('laporans.show', compact('laporans'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Laporan $laporan)
     {
-        // Tampilkan form untuk mengedit laporan
-        return view('laporans.edit', compact('laporans'));
+        return view('laporans.edit', compact('laporan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Laporan $laporan)
     {
-        // Validasi input
-        $request->validate([
+        $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'jenis_laporan' => 'required|in:kehadiran,penggajian,kinerja',
             'periode_awal' => 'required|date',
             'periode_akhir' => 'required|date|after_or_equal:periode_awal',
             'format' => 'required|in:PDF,Excel,CSV',
-            'file_path' => 'nullable|string',
+            'file' => 'nullable|file|mimes:pdf,xlsx,csv|max:2048',
         ]);
 
-        // Update data laporan
-        $laporan->update($request->all());
+        try {
+            if ($request->hasFile('file')) {
+                // Delete old file if exists
+                if ($laporan->file_path) {
+                    Storage::delete($laporan->file_path);
+                }
+                $validated['file_path'] = $request->file('file')->store('laporan_files');
+            }
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('laporans.index')
-                         ->with('success', 'Laporan berhasil diperbarui.');
+            $laporan->update($validated);
+
+            return redirect()->route('laporans.index')
+                ->with('success', 'Laporan berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->with('error', 'Gagal memperbarui laporan: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Laporan $laporan)
     {
-        // Hapus data laporan
-        $laporan->delete();
+        try {
+            // Delete file if exists
+            if ($laporan->file_path) {
+                Storage::delete($laporan->file_path);
+            }
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('laporans.index')
-                         ->with('success', 'Laporan berhasil dihapus.');
+            $laporan->delete();
+
+            return redirect()->route('laporans.index')
+                ->with('success', 'Laporan berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus laporan: ' . $e->getMessage());
+        }
+    }
+
+    public function download(Laporan $laporan)
+    {
+        if (!$laporan->file_path || !Storage::exists($laporan->file_path)) {
+            abort(404);
+        }
+
+        return Storage::download($laporan->file_path);
     }
 }

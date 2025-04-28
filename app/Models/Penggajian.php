@@ -9,28 +9,51 @@ class Penggajian extends Model
 {
     use HasFactory;
 
-    protected $table = 'penggajians'; // Nama tabel
+    protected $table = 'penggajians';
 
     protected $fillable = [
-        'karyawan_id', 
-        'gaji_pokok', 
-        'tunjangan_transport', 
-        'tunjangan_makan', 
-        'tunjangan_lembur', 
-        'potongan', 
-        'total_gaji', 
+        'karyawan_id',
+        'gaji_pokok',
+        'tunjangan_transport',
+        'tunjangan_makan',
+        'tunjangan_lembur',
+        'potongan',
+        'total_gaji',
         'tanggal_gajian'
     ];
 
-    // Relasi dengan tabel Karyawan
+    protected $casts = [
+        'tanggal_gajian' => 'date',
+        'gaji_pokok' => 'decimal:2',
+        'tunjangan_transport' => 'decimal:2',
+        'tunjangan_makan' => 'decimal:2',
+        'tunjangan_lembur' => 'decimal:2',
+        'potongan' => 'decimal:2',
+        'total_gaji' => 'decimal:2',
+    ];
+
     public function karyawan()
     {
-        return $this->belongsTo(Karyawan::class);
+        return $this->belongsTo(Karyawan::class, 'karyawan_id');
     }
 
-    // Mengambil nama jabatan dari tabel Karyawan
-    public function getJabatanAttribute()
+    protected static function booted()
     {
-        return $this->karyawan->jabatan ?? 'Tidak Ada Jabatan';
+        static::creating(function ($model) {
+            $model->calculateTotal();
+        });
+
+        static::updating(function ($model) {
+            $model->calculateTotal();
+        });
+    }
+
+    public function calculateTotal()
+    {
+        $this->total_gaji = $this->gaji_pokok 
+                          + $this->tunjangan_transport
+                          + $this->tunjangan_makan
+                          + $this->tunjangan_lembur
+                          - $this->potongan;
     }
 }

@@ -36,19 +36,27 @@
                                     <tr class="border-b bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition duration-200">
                                         <td class="px-6 py-4 text-center">{{ $loop->iteration }}</td>
                                         <td class="px-6 py-4 text-center">{{ $laporan->judul }}</td>
-                                        <td class="px-6 py-4 text-center">{{ ucfirst($laporan->jenis_laporan) }}</td>
-                                        <td class="px-6 py-4 text-center">{{ $laporan->periode_awal }}</td>
-                                        <td class="px-6 py-4 text-center">{{ $laporan->periode_akhir }}</td>
-                                        <td class="px-6 py-4 text-center">{{ $laporan->format }}</td>
-                                        <td class="px-6 py-4 text-center">
-                                            <a href="{{ route('laporans.edit', $laporan->id) }}"
+                                        <td class="px-6 py-4 text-center">{{ $laporan->jenis_display }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $laporan->periode_awal->format('d/m/Y') }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $laporan->periode_akhir->format('d/m/Y') }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $laporan->format_display }}</td>
+                                        <td class="px-6 py-4 text-center space-x-2">
+                                            @if($laporan->file_path)
+                                                <a href="{{ route('laporans.download', $laporan) }}" 
+                                                   class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 text-xs">
+                                                    Download
+                                                </a>
+                                            @endif
+                                            <a href="{{ route('laporans.edit', $laporan) }}"
                                                 class="px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-200 text-xs">
                                                 Edit
                                             </a>
-                                            <form action="{{ route('laporans.destroy', $laporan->id) }}" method="POST" class="inline">
+                                            <form action="{{ route('laporans.destroy', $laporan) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 text-xs">
+                                                <button type="submit" 
+                                                        class="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 text-xs"
+                                                        onclick="return confirm('Apakah Anda yakin ingin menghapus laporan ini?')">
                                                     Hapus
                                                 </button>
                                             </form>
@@ -56,7 +64,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">Data Belum Tersedia!</td>
+                                        <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Data Belum Tersedia!</td>
                                     </tr>
                                 @endforelse
                             </tbody>

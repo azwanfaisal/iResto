@@ -2,55 +2,83 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Absensi;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Karyawan;
+use Illuminate\Http\Request;
 
 class AbsensiController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $absensis = Absensi::with('user')->latest()->paginate(10);
+        $absensis = Absensi::with('karyawan')->latest()->paginate(10);
         return view('absensi.index', compact('absensis'));
     }
 
-    public function checkin()
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
     {
-        // Cek apakah user sudah absen masuk hari ini
-        $existingAbsensi = Absensi::where('user_id', Auth::id())
-            ->where('date', now()->toDateString())
-            ->first();
-
-        if ($existingAbsensi) {
-            return redirect()->back()->with('error', 'Anda sudah melakukan absen masuk hari ini!');
-        }
-
-        // Simpan data absen masuk
-        Absensi::create([
-            'user_id' => Auth::id(),
-            'date' => now()->toDateString(),
-            'check_in' => now()->toTimeString(),
-            'status' => now()->hour > 9 ? 'late' : 'ontime'
-        ]);
-
-        return redirect()->back()->with('success', 'Absen masuk berhasil!');
+        $karyawans = Karyawan::all();
+        return view('absensi.create', compact('karyawans'));
     }
 
-    public function checkout()
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
-        $attendance = Absensi::where('user_id', Auth::id())
-            ->where('date', now()->toDateString())
-            ->first();
-        
-        if ($attendance) {
-            if ($attendance->check_out) {
-                return redirect()->back()->with('error', 'Anda sudah melakukan absen keluar!');
-            }
+        $validated = $request->validate([
+            'karyawan_id' => 'required|exists:karyawans,id',
+            'tanggal' => 'required|date',
+            'jam_masuk' => 'nullable|date_format:H:i',
+            'jam_pulang' => 'nullable|date_format:H:i|after:jam_masuk',
+            'status' => 'required|in:hadir,izin,sakit,cuti,alpa',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
 
-            $attendance->update(['check_out' => now()->toTimeString()]);
-            return redirect()->back()->with('success', 'Absen keluar berhasil!');
-        }
+        Absensi::create($validated);
 
-        return redirect()->back()->with('error', 'Anda belum absen masuk!');
+        return redirect()->route('absensi.index')->with('success', 'Data absensi berhasil ditambahkan!');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Absensi $absensi)
+    {
+        $karyawans = Karyawan::all();
+        return view('absensi.edit', compact('absensi', 'karyawans'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Absensi $absensi)
+    {
+        $validated = $request->validate([
+            'karyawan_id' => 'required|exists:karyawans,id',
+            'tanggal' => 'required|date',
+            'jam_masuk' => 'nullable|date_format:H:i',
+            'jam_pulang' => 'nullable|date_format:H:i|after:jam_masuk',
+            'status' => 'required|in:hadir,izin,sakit,cuti,alpa',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        $absensi->update($validated);
+
+        return redirect()->route('absensi.index')->with('success', 'Data absensi berhasil diperbarui!');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Absensi $absensi)
+    {
+        $absensi->delete();
+        return redirect()->route('absensi.index')->with('success', 'Data absensi berhasil dihapus!');
     }
 }
