@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class KaryawanController extends Controller
 {
@@ -35,22 +37,23 @@ class KaryawanController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'nama_lengkap' => 'required|string|max:255',
-            'alamat' => 'required|string',
-            'nomor_telepon' => 'required|string|max:15',
-            'email' => 'required|email|unique:karyawans,email',
+        $request->validate([
+            'nama_lengkap' => 'required',
+            'alamat' => 'required',
+            'nomor_telepon' => 'required',
+            'email' => 'required|email|unique:karyawans',
             'tanggal_lahir' => 'required|date',
-            'foto' => 'nullable|image|max:2048',
-            'jabatan' => 'required|string',
-            'status_kepegawaian' => 'required|string',
-            'tanggal_masuk' => 'required|date', // Tambahkan ini
+            'jabatan' => 'required',
+            'status_kepegawaian' => 'required',
+            'tanggal_masuk' => 'required|date',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
+
+        $data = $request->all();
 
         if ($request->hasFile('foto')) {
             $data['foto'] = $request->file('foto')->store('karyawan', 'public');
         }
-        
 
         Karyawan::create($data);
 
@@ -71,30 +74,54 @@ class KaryawanController extends Controller
     public function update(Request $request, Karyawan $karyawan)
     {
         $request->validate([
-            'nama_lengkap' => 'required|string|max:255',
+            'nama_lengkap' => 'required',
             'alamat' => 'required',
-            'nomor_telepon' => 'required|string|max:20',
-            'email' => 'required|string|email|max:255|unique:karyawans,email,' . $karyawan->id,
+            'nomor_telepon' => 'required',
+            'email' => 'required|email|unique:karyawans,email,' . $karyawan->id,
             'tanggal_lahir' => 'required|date',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'jabatan' => 'required|in:kasir,pelayan,chef,manager,lainnya',
-            'status_kepegawaian' => 'required|in:aktif,tidak aktif',
+            'jabatan' => 'required',
+            'status_kepegawaian' => 'required',
             'tanggal_masuk' => 'required|date',
-            'tanggal_keluar' => 'nullable|date',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $karyawan->update($request->all());
+        $data = $request->all();
 
-        return redirect()->route('karyawans.index')->with('success', 'Data karyawan berhasil diperbarui.');
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($karyawan->foto) {
+                Storage::disk('public')->delete($karyawan->foto);
+            }
+            $data['foto'] = $request->file('foto')->store('karyawan', 'public');
+        }
+
+        $karyawan->update($data);
+
+        return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil diperbarui');
     }
+   public function show($id)
+{
+    $karyawan = Karyawan::findOrFail($id);
+
+    return view('karyawan.show', compact('karyawan'));
+}
+
+
+
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Karyawan $karyawan)
     {
+        // Hapus foto jika ada
+        if ($karyawan->foto) {
+            Storage::disk('public')->delete($karyawan->foto);
+        }
+
         $karyawan->delete();
 
-        return redirect()->route('karyawans.index')->with('success', 'Data karyawan berhasil dihapus.');
+        return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil dihapus');
     }
 }

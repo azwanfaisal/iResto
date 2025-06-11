@@ -1,23 +1,39 @@
 <x-app-layout>
-    <x-slot name="header">
+     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Laporan Management') }}
         </h2>
     </x-slot>
 
+   
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
                 <div class="py-6 px-8">
-                    {{-- Add Button --}}
-                    <div class="mb-6">
-                        <a href="{{ route('laporans.create') }}"
+                    {{-- Action Buttons --}}
+                    <div class="mb-6 flex space-x-2">
+                        <button type="button"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                            Filter
+                        </button>
+                        <button type="button"
+                            class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition duration-200">
+                            Proses
+                        </button>
+                        <button type="button"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200">
+                            Export PDF
+                        </button>
+                        <button type="button"
                             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200">
-                            + Tambah Laporan
-                        </a>
+                            Export Excel
+                        </button>
                     </div>
 
-                    {{-- Laporan Table --}}
+                    {{-- Rest of the table and content remains the same --}}
+                    <div class="relative overflow-x-auto shadow-md rounded-lg">
+                        <table class="w-full text-sm text-left text-gray-700 dark:text-gray-300">
+                           {{-- Laporan Table --}}
                     <div class="relative overflow-x-auto shadow-md rounded-lg">
                         <table class="w-full text-sm text-left text-gray-700 dark:text-gray-300">
                             <thead class="text-md text-white bg-blue-600 dark:bg-blue-700">
@@ -75,8 +91,16 @@
                     <div class="mt-4">
                         {{ $laporans->links() }}
                     </div>
+                        </table>
+                    </div>
+
+                    {{-- Pagination remains the same --}}
+                    <div class="mt-4">
+                        {{ $laporans->links() }}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+      
 </x-app-layout>

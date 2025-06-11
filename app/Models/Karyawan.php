@@ -20,5 +20,10 @@ class Karyawan extends Model
         'status_kepegawaian',
         'tanggal_masuk',
     ];
+     // Relasi ke jadwal kerja
+    public function jadwalKerjas()
+    {
+        return $this->hasMany(JadwalKerja::class);
+    }
 }
 

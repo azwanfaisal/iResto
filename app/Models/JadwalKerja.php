@@ -17,6 +17,7 @@ class JadwalKerja extends Model
         'shift',
         'posisi',
         'status',
+        'catatan'
     ];
 
     public function karyawan()

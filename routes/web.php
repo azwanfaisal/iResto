@@ -36,6 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('penggajians', PenggajianController::class);
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::resource('evaluasi_kinerja', EvaluasiKinerjaController::class);
+    Route::get('/karyawan/{karyawan}', [KaryawanController::class, 'show'])->name('karyawan.show');
+
+
     
 
 
