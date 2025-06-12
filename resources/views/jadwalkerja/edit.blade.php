@@ -6,74 +6,72 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-sm">
-                <div class="mx-auto py-4 px-4 sm:px-6 lg:px-8 text-gray-900 dark:text-gray-100">
-                    <form method="POST" action="{{ route('jadwalkerja.update', $jadwal->id) }}">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+                <div class="p-6">
+                    <form method="POST" action="{{ route('jadwalkerja.update', $jadwalkerja->id) }}">
                         @csrf
                         @method('PUT')
 
-                        <!-- Nama Karyawan -->
-                        <div>
-                            <x-input-label for="karyawan_id" :value="__('Nama Karyawan')" />
-                            <select id="karyawan_id" name="karyawan_id" required class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50">
-                                <option value="">-- Pilih Karyawan --</option>
-                                @foreach ($karyawans as $karyawan)
-                                    <option value="{{ $karyawan->id }}" data-jabatan="{{ $karyawan->jabatan }}"
-                                        {{ $jadwal->karyawan_id == $karyawan->id ? 'selected' : '' }}>
-                                        {{ $karyawan->nama_lengkap }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('karyawan_id')" class="mt-2" />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Karyawan -->
+                            <div>
+                                <label for="karyawan_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Karyawan</label>
+                                <select name="karyawan_id" id="karyawan_id" 
+                                        class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                                        required
+                                        onchange="updatePosisi(this)">
+                                    @foreach($karyawans as $karyawan)
+                                        <option value="{{ $karyawan->id }}" 
+                                                data-posisi="{{ $karyawan->jabatan }}"
+                                                {{ $jadwalkerja->karyawan_id == $karyawan->id ? 'selected' : '' }}>
+                                            {{ $karyawan->nama_lengkap }} - {{ $karyawan->jabatan }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Tanggal -->
+                            <div>
+                                <label for="tanggal" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal</label>
+                                <input type="date" name="tanggal" id="tanggal" 
+                                       value="{{ $jadwalkerja->tanggal }}" 
+                                       class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                                       required>
+                            </div>
+
+                            <!-- Shift -->
+                            <div>
+                                <label for="shift" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shift</label>
+                                <select name="shift" id="shift" 
+                                        class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                                        required>
+                                    <option value="pagi" {{ $jadwalkerja->shift == 'pagi' ? 'selected' : '' }}>Pagi</option>
+                                    <option value="siang" {{ $jadwalkerja->shift == 'siang' ? 'selected' : '' }}>Siang</option>
+                                    <option value="malam" {{ $jadwalkerja->shift == 'malam' ? 'selected' : '' }}>Malam</option>
+                                </select>
+                            </div>
+
+                            <!-- Posisi (Akan diisi otomatis) -->
+                            <div>
+                                <label for="posisi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Posisi</label>
+                                <input type="text" name="posisi" id="posisi" 
+                                       value="{{ $jadwalkerja->posisi }}" 
+                                       class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-gray-100 dark:bg-gray-600" 
+                                       readonly required>
+                               
+                            </div>
                         </div>
 
-                        <!-- Posisi (Otomatis Terisi) -->
-                        <div class="mt-4">
-                            <x-input-label for="posisi" :value="__('Posisi')" />
-                            <x-text-input id="posisi" class="block mt-1 w-full" type="text" name="posisi" 
-                                value="{{ old('posisi', $jadwal->posisi) }}" readonly />
-                            <x-input-error :messages="$errors->get('posisi')" class="mt-2" />
-                        </div>
-
-                        <!-- Status Kepegawaian -->
-                        <div class="mt-4">
-                            <x-input-label for="status" :value="__('Status')" />
-                            <select id="status" name="status" required class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50">
-                                <option value="">-- Pilih Status --</option>
-                                <option value="terjadwal" {{ $jadwal->status == 'terjadwal' ? 'selected' : '' }}>Terjadwal</option>
-                                <option value="diganti" {{ $jadwal->status == 'diganti' ? 'selected' : '' }}>Diganti</option>
-                                <option value="dikonfirmasi" {{ $jadwal->status == 'dikonfirmasi' ? 'selected' : '' }}>Dikonfirmasi</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('status')" class="mt-2" />
-                        </div>
-
-                        <!-- Tanggal -->
-                        <div class="mt-4">
-                            <x-input-label for="tanggal" :value="__('Tanggal')" />
-                            <x-text-input id="tanggal" class="block mt-1 w-full" type="date" name="tanggal" 
-                                value="{{ old('tanggal', $jadwal->tanggal) }}" required />
-                            <x-input-error :messages="$errors->get('tanggal')" class="mt-2" />
-                        </div>
-
-                        <!-- Shift -->
-                        <div class="mt-4">
-                            <x-input-label for="shift" :value="__('Shift')" />
-                            <select id="shift" name="shift" required class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50">
-                                <option value="pagi" {{ $jadwal->shift == 'pagi' ? 'selected' : '' }}>Pagi</option>
-                                <option value="siang" {{ $jadwal->shift == 'siang' ? 'selected' : '' }}>Siang</option>
-                                <option value="malam" {{ $jadwal->shift == 'malam' ? 'selected' : '' }}>Malam</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('shift')" class="mt-2" />
-                        </div>
-
-                        <div class="flex items-center justify-end mt-4">
-                            <x-danger-link-button class="ms-4" :href="route('jadwalkerja.index')">
-                                {{ __('Back') }}
-                            </x-danger-link-button>
-                            <x-primary-button class="ms-4">
-                                {{ __('Update') }}
-                            </x-primary-button>
+                        <div class="flex justify-end mt-6 space-x-3">
+                            <a href="{{ route('jadwalkerja.index') }}" 
+                               class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200">
+                                Batal
+                            </a>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                                Update
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -81,24 +79,19 @@
         </div>
     </div>
 
-    <!-- JavaScript untuk Mengisi Posisi Otomatis -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set posisi awal berdasarkan data yang sudah ada
-            let karyawanSelect = document.getElementById('karyawan_id');
-            let posisiInput = document.getElementById('posisi');
-            
-            // Set posisi saat pertama kali load
-            if (karyawanSelect.selectedIndex > 0) {
-                let selectedOption = karyawanSelect.options[karyawanSelect.selectedIndex];
-                posisiInput.value = selectedOption.getAttribute('data-jabatan') || '';
-            }
+        function updatePosisi(select) {
+            const selectedOption = select.options[select.selectedIndex];
+            const posisi = selectedOption.getAttribute('data-posisi');
+            document.getElementById('posisi').value = posisi || '';
+        }
 
-            // Event listener untuk perubahan
-            karyawanSelect.addEventListener('change', function() {
-                let selectedOption = this.options[this.selectedIndex];
-                posisiInput.value = selectedOption.getAttribute('data-jabatan') || '';
-            });
+        // Inisialisasi posisi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            const select = document.getElementById('karyawan_id');
+            if (select) {
+                updatePosisi(select);
+            }
         });
     </script>
 </x-app-layout>

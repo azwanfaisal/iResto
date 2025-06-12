@@ -6,70 +6,69 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-sm">
-                <div class="mx-auto py-4 px-4 sm:px-6 lg:px-8 text-gray-900 dark:text-gray-100">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+                <div class="p-6">
                     <form method="POST" action="{{ route('jadwalkerja.store') }}">
                         @csrf
 
-                        <!-- Nama Karyawan -->
-                        <div>
-                            <x-input-label for="karyawan_id" :value="__('Nama Karyawan')" />
-                            <select id="karyawan_id" name="karyawan_id" required class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50">
-                                <option value="">-- Pilih Karyawan --</option>
-                                @foreach ($karyawans as $karyawan)
-                                    <option value="{{ $karyawan->id }}" data-jabatan="{{ $karyawan->jabatan }}">
-                                        {{ $karyawan->nama_lengkap }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('karyawan_id')" class="mt-2" />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Karyawan -->
+                            <div>
+                                <label for="karyawan_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Karyawan</label>
+                                <select name="karyawan_id" id="karyawan_id" 
+                                        class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                                        required
+                                        onchange="updatePosisi(this)">
+                                    <option value="">Pilih Karyawan</option>
+                                    @foreach($karyawans as $karyawan)
+                                        <option value="{{ $karyawan->id }}" data-posisi="{{ $karyawan->jabatan }}">
+                                            {{ $karyawan->nama_lengkap }} - {{ $karyawan->jabatan }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Tanggal -->
+                            <div>
+                                <label for="tanggal" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal</label>
+                                <input type="date" name="tanggal" id="tanggal" 
+                                       class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                                       required>
+                            </div>
+
+                            <!-- Shift -->
+                            <div>
+                                <label for="shift" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shift</label>
+                                <select name="shift" id="shift" 
+                                        class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500" 
+                                        required>
+                                    <option value="">Pilih Shift</option>
+                                    <option value="pagi">Pagi</option>
+                                    <option value="siang">Siang</option>
+                                    <option value="malam">Malam</option>
+                                </select>
+                            </div>
+
+                            <!-- Posisi (Akan diisi otomatis) -->
+                            <div>
+                                <label for="posisi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Posisi</label>
+                                <input type="text" name="posisi" id="posisi" 
+                                       class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-gray-100 dark:bg-gray-600" 
+                                       readonly required>
+                                
+                            </div>
                         </div>
 
-                        <!-- Posisi (Otomatis Terisi) -->
-                        <div class="mt-4">
-                            <x-input-label for="posisi" :value="__('Posisi')" />
-                            <x-text-input id="posisi" class="block mt-1 w-full" type="text" name="posisi" readonly />
-                            <x-input-error :messages="$errors->get('posisi')" class="mt-2" />
-                        </div>
-
-                        <!-- Status Kepegawaian -->
-                        <div class="mt-4">
-                            <x-input-label for="status" :value="__('Status')" />
-                            <select id="status" name="status" required class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50">
-                                <option value="">-- Pilih Status --</option>
-                                <option value="terjadwal">Terjadwal</option>
-                                <option value="diganti">Diganti</option>
-                                <option value="dikonfirmasi">Dikonfirmasi</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('status')" class="mt-2" />
-                        </div>
-
-                        <!-- Tanggal -->
-                        <div class="mt-4">
-                            <x-input-label for="tanggal" :value="__('Tanggal')" />
-                            <x-text-input id="tanggal" class="block mt-1 w-full" type="date" name="tanggal" required />
-                            <x-input-error :messages="$errors->get('tanggal')" class="mt-2" />
-                        </div>
-
-                        <!-- Shift -->
-                        <div class="mt-4">
-                            <x-input-label for="shift" :value="__('Shift')" />
-                            <select id="shift" name="shift" required class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50">
-                                <option value="pagi">Pagi</option>
-                                <option value="siang">Siang</option>
-                                <option value="malam">Malam</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('shift')" class="mt-2" />
-                        </div>
-
-                        <div class="flex items-center justify-end mt-4">
-                            <x-danger-link-button class="ms-4" :href="route('jadwalkerja.index')">
-                                {{ __('Back') }}
-                            </x-danger-link-button>
-                            <x-primary-button class="ms-4">
-                                {{ __('Save') }}
-                            </x-primary-button>
+                        <div class="flex justify-end mt-6 space-x-3">
+                            <a href="{{ route('jadwalkerja.index') }}" 
+                               class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200">
+                                Batal
+                            </a>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200">
+                                Simpan
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -77,17 +76,11 @@
         </div>
     </div>
 
-    <!-- JavaScript untuk Mengisi Posisi Otomatis -->
     <script>
-        document.getElementById('karyawan_id').addEventListener('change', function() {
-            let selectedOption = this.options[this.selectedIndex];
-            let posisiInput = document.getElementById('posisi');
-            
-            // Ambil jabatan dari attribute data-jabatan
-            let jabatan = selectedOption.getAttribute('data-jabatan') || '';
-
-            // Isi otomatis input posisi
-            posisiInput.value = jabatan;
-        });
+        function updatePosisi(select) {
+            const selectedOption = select.options[select.selectedIndex];
+            const posisi = selectedOption.getAttribute('data-posisi');
+            document.getElementById('posisi').value = posisi || '';
+        }
     </script>
 </x-app-layout>

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('karyawan_id')->constrained('karyawans')->onDelete('cascade');
             $table->date('tanggal');
-            $table->enum('shift', ['pagi', 'siang', 'malam']);
+            $table->enum('shift', ['pagi', 'siang', 'malam', 'off']);
             $table->string('posisi');
             $table->enum('status', ['terjadwal', 'diganti', 'dikonfirmasi'])->default('terjadwal');
             $table->text('catatan')->nullable();

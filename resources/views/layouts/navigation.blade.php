@@ -49,11 +49,21 @@
                                 <x-dropdown-link :href="route('jadwalkerja.index')" :active="request()->routeIs('jadwalkerja.index')">
                                     {{ __('Jadwal Kerja') }}
                                 </x-dropdown-link>
-                                <x-dropdown-link :href="route('penggajians.index')" :active="request()->routeIs('penggajians.index')">
-                                    {{ __('Penggajian') }}
+                                <x-dropdown-link :href="route('pengajuan.index')" :active="request()->routeIs('pengajuan.index')">
+                                    {{ __('Pengajuan Jadwal') }}
                                 </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
+                    </div>
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('absensi.index')" :active="request()->routeIs('absensi.index')">
+                            {{ __('Absensi') }}
+                        </x-nav-link>
+                    </div>
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('penggajian.index')" :active="request()->routeIs('penggajians.index')">
+                            {{ __('Penggajian') }}
+                        </x-nav-link>
                     </div>
 
                     <!-- Laporan -->
@@ -62,11 +72,7 @@
                             {{ __('Laporan') }}
                         </x-nav-link>
                     </div>
-                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('absensi.index')" :active="request()->routeIs('absensi.index')">
-                            {{ __('Absensi') }}
-                        </x-nav-link>
-                    </div>
+
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('evaluasi_kinerja.index')" :active="request()->routeIs('evaluasi_kinerja.index')">
                             {{ __('Evaluasi Kinerja') }}

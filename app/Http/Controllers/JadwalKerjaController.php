@@ -2,94 +2,180 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\JadwalKerja;
 use App\Models\Karyawan;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
+use App\Models\PergantianJadwal;
 
 class JadwalKerjaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $jadwalKerja = JadwalKerja::with('karyawan')->paginate(10);
+        $query = JadwalKerja::query();
+
+        // Filter berdasarkan tanggal
+        if ($request->has('tanggal')) {
+            $query->where('tanggal', $request->tanggal);
+        }
+
+        // Filter berdasarkan shift
+        if ($request->has('shift') && $request->shift !== '') {
+            $query->where('shift', $request->shift);
+        }
+
+        $jadwalKerja = $query->paginate(10);
+
         return view('jadwalkerja.index', compact('jadwalKerja'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $karyawans = Karyawan::all();
         return view('jadwalkerja.create', compact('karyawans'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'karyawan_id' => 'required|exists:karyawans,id',
             'tanggal' => 'required|date',
-            'shift' => 'required|in:pagi,siang,malam',
-            'posisi' => 'required|string|max:100',
-            'status' => 'required|in:terjadwal,diganti,dikonfirmasi',
+            'shift' => 'required|in:pagi,siang,malam'
         ]);
-    
-        try {
-            JadwalKerja::create($request->all());
-            return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal kerja berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Gagal menambahkan jadwal kerja: ' . $e->getMessage());
-        }
+
+        // Ambil data karyawan untuk mendapatkan posisi
+        $karyawan = Karyawan::findOrFail($request->karyawan_id);
+
+        JadwalKerja::create([
+            'karyawan_id' => $request->karyawan_id,
+            'tanggal' => $request->tanggal,
+            'shift' => $request->shift,
+            'posisi' => $karyawan->jabatan, // Ambil posisi dari data karyawan
+            'status' => 'terjadwal'
+        ]);
+
+        return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal berhasil dibuat!');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function edit(JadwalKerja $jadwalkerja)
     {
-        $jadwal = JadwalKerja::findOrFail($id);
         $karyawans = Karyawan::all();
-        return view('jadwalkerja.edit', compact('jadwal', 'karyawans'));
+        return view('jadwalkerja.edit', compact('jadwalkerja', 'karyawans'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, JadwalKerja $jadwalkerja)
     {
         $request->validate([
             'karyawan_id' => 'required|exists:karyawans,id',
             'tanggal' => 'required|date',
-            'shift' => 'required|in:pagi,siang,malam',
-            'posisi' => 'required|string|max:100',
-            'status' => 'required|in:terjadwal,diganti,dikonfirmasi',
+            'shift' => 'required|in:pagi,siang,malam'
         ]);
 
-        try {
-            $jadwal = JadwalKerja::findOrFail($id);
-            $jadwal->update($request->all());
-            return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal kerja berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Gagal memperbarui jadwal kerja: ' . $e->getMessage());
+        // Ambil data karyawan untuk mendapatkan posisi
+        $karyawan = Karyawan::findOrFail($request->karyawan_id);
+
+        $jadwalkerja->update([
+            'karyawan_id' => $request->karyawan_id,
+            'tanggal' => $request->tanggal,
+            'shift' => $request->shift,
+            'posisi' => $karyawan->jabatan // Update posisi dari data karyawan
+        ]);
+
+        return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal berhasil diperbarui!');
+    }
+
+    public function destroy(JadwalKerja $jadwalkerja)
+    {
+        $jadwalkerja->delete();
+        return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal berhasil dihapus!');
+    }
+    public function createWeekly()
+    {
+        // Ambil semua karyawan
+        $karyawans = Karyawan::all();
+
+        // Ambil tanggal minggu ini (Senin - Minggu)
+        $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $dates = collect();
+
+        for ($i = 0; $i < 7; $i++) {
+            $dates->push($startOfWeek->copy()->addDays($i));
+        }
+
+        return view('jadwalkerja.create-weekly', compact('karyawans', 'dates'));
+    }
+
+   public function storeWeekly(Request $request)
+{
+    $jadwalData = $request->input('jadwal');
+
+    foreach ($jadwalData as $karyawan_id => $tanggalData) {
+        foreach ($tanggalData as $tanggal => $data) {
+            if (!empty($data['shift'])) {
+                JadwalKerja::create([
+                    'karyawan_id' => $karyawan_id,
+                    'tanggal' => $tanggal,
+                    'shift' => $data['shift'],
+                    'posisi' => $data['posisi'] ?? 'default', // posisi berasal dari jabatan karyawan
+                ]);
+            }
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        try {
-            $jadwal = JadwalKerja::findOrFail($id);
-            $jadwal->delete();
-            return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal kerja berhasil dihapus.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menghapus jadwal kerja: ' . $e->getMessage());
+    return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal mingguan berhasil disimpan.');
+}
+public function ajukanPergantian($id)
+{
+    $jadwal = JadwalKerja::findOrFail($id);
+    $karyawans = Karyawan::where('id', '!=', $jadwal->karyawan_id)->get();
+
+    return view('jadwalkerja.ajukan', compact('jadwal', 'karyawans'));
+}
+public function simpanPergantian(Request $request, $jadwalId)
+{
+    $request->validate([
+        'pengganti_id' => 'required|exists:karyawans,id',
+        'alasan' => 'required|string|max:1000',
+    ]);
+
+    PergantianJadwal::create([
+        'jadwalkerja_id' => $jadwalId,
+        'pengganti_id' => $request->pengganti_id,
+        'alasan' => $request->alasan,
+        'status' => 'diajukan',
+    ]);
+
+    return redirect()->route('jadwalkerja.index')->with('success', 'Pengajuan pergantian jadwal berhasil dikirim.');
+}
+// Menampilkan semua pengajuan untuk admin
+public function pengajuanIndex()
+{
+    $pengajuans = PergantianJadwal::with(['jadwalKerja.karyawan', 'pengganti'])->latest()->get();
+    return view('admin.pengajuan.index', compact('pengajuans'));
+}
+
+// Menerima atau menolak pengajuan
+public function ubahStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:diterima,ditolak',
+    ]);
+
+    $pengajuan = PergantianJadwal::findOrFail($id);
+    $pengajuan->status = $request->status;
+    $pengajuan->save();
+
+    // Jika pengajuan diterima, update juga status pada tabel jadwal_kerjas
+    if ($request->status === 'diterima') {
+        $jadwal = JadwalKerja::find($pengajuan->jadwalkerja_id);
+        if ($jadwal) {
+            $jadwal->status = 'diganti';
+            $jadwal->save();
         }
     }
+
+    return redirect()->back()->with('success', 'Status pengajuan berhasil diperbarui.');
+}
+
+
 }
