@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('potongan', 15, 2)->default(0);
             $table->decimal('total_gaji', 15, 2);
             $table->date('tanggal_gajian');
+            $table->enum('status', ['belum dibayar', 'dibayar'])->default('belum dibayar');
             $table->timestamps();
 
             // Foreign key constraint added separately

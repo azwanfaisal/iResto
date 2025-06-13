@@ -9,7 +9,10 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PenggajianController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PengajuanController;
 use Illuminate\Support\Facades\Route;
+use App\Exports\RekapAbsensiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,6 +21,12 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/absensi/rekap/excel', function () {
+    $bulan = request('bulan') ?? date('Y-m');
+    $karyawan_id = request('karyawan_id') ?? null;
+
+    return Excel::download(new RekapAbsensiExport($bulan, $karyawan_id), 'rekap-absensi.xlsx');
+})->name('absensi.rekapBulananExcel');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -26,7 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('users',UserController::class);
     Route::resource('karyawan', KaryawanController::class); 
    Route::resource('jadwalkerja', JadwalKerjaController::class)->except(['show']);
-    Route::resource('absensi', AbsensiController::class); 
+   Route::resource('absensi', AbsensiController::class)->except(['show']);
+
     Route::post('/absensi/checkin', [AbsensiController::class, 'checkin'])->name('absensi.checkin');
     Route::post('/absensi/checkout', [AbsensiController::class, 'checkout'])->name('absensi.checkout');
     Route::resource('penggajian', PenggajianController::class);
@@ -52,6 +62,23 @@ Route::post('/jadwal-kerja/{id}/ajukan-pergantian', [JadwalKerjaController::clas
    // Untuk admin melihat & memproses pengajuan
 Route::get('/pengajuan-pergantian', [JadwalKerjaController::class, 'pengajuanIndex'])->name('pengajuan.index');
 Route::post('/pengajuan-pergantian/{id}/status', [JadwalKerjaController::class, 'ubahStatus'])->name('pengajuan.ubah-status');
+Route::post('/absensi/masuk', [AbsensiController::class, 'absenMasuk'])->name('absensi.masuk');
+Route::post('/absen/pulang', [AbsensiController::class, 'absenPulang'])->name('absensi.pulang');
+Route::get('/absensi/rekap-bulanan', [AbsensiController::class, 'rekapBulanan'])->name('absensi.rekapBulanan');
+Route::get('/absensi/rekap-bulanan/pdf', [AbsensiController::class, 'exportRekapBulananPdf'])->name('absensi.rekapBulananPdf');
+Route::get('/absensi/form-pengajuan', [AbsensiController::class, 'formPengajuan'])->name('absensi.formPengajuan');
+Route::get('/absensi/pengajuan', [AbsensiController::class, 'formPengajuan'])->name('absensi.formPengajuan');
+Route::post('/absensi/pengajuan', [AbsensiController::class, 'pengajuanIzinCuti'])->name('absensi.pengajuanIzinCuti');
+
+Route::get('/absensi/qr', [AbsensiController::class, 'qrScanner'])->name('absensi.qr');
+Route::get('/penggajians/get-gaji-data/{karyawan}', [PenggajianController::class, 'getGajiData']);
+Route::get('/penggajians/get-gaji-data/{id}', [App\Http\Controllers\PenggajianController::class, 'getGajiData']);
+Route::get('/penggajians/{id}/slip', [PenggajianController::class, 'slip'])->name('penggajians.slip');
+Route::get('/penggajians/{id}/slip/pdf', [PenggajianController::class, 'slipPdf'])->name('penggajians.slip.pdf');
+Route::put('/penggajians/{id}/bayar', [PenggajianController::class, 'bayar'])->name('penggajians.bayar');
+
+
+
 
 
 

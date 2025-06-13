@@ -133,7 +133,7 @@
                             @forelse ($recentPenggajian as $penggajian)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $penggajian->karyawan->nama }}
+                                        {{ $penggajian->karyawan->nama_lengkap }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                         {{ number_format($penggajian->total_gaji, 2) }}

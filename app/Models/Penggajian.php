@@ -34,8 +34,9 @@ class Penggajian extends Model
 
     public function karyawan()
     {
-        return $this->belongsTo(Karyawan::class, 'karyawan_id');
+        return $this->belongsTo(Karyawan::class);
     }
+
 
     protected static function booted()
     {
@@ -50,10 +51,10 @@ class Penggajian extends Model
 
     public function calculateTotal()
     {
-        $this->total_gaji = $this->gaji_pokok 
-                          + $this->tunjangan_transport
-                          + $this->tunjangan_makan
-                          + $this->tunjangan_lembur
-                          - $this->potongan;
+        $this->total_gaji = $this->gaji_pokok
+            + $this->tunjangan_transport
+            + $this->tunjangan_makan
+            + $this->tunjangan_lembur
+            - $this->potongan;
     }
 }

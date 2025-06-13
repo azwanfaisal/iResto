@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\User;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class KaryawanController extends Controller
 {
@@ -35,30 +36,41 @@ class KaryawanController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama_lengkap' => 'required',
-            'alamat' => 'required',
-            'nomor_telepon' => 'required',
-            'email' => 'required|email|unique:karyawans',
-            'tanggal_lahir' => 'required|date',
-            'jabatan' => 'required',
-            'status_kepegawaian' => 'required',
-            'tanggal_masuk' => 'required|date',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'nama_lengkap' => 'required',
+        'alamat' => 'required',
+        'nomor_telepon' => 'required',
+        'email' => 'required|email|unique:karyawans|unique:users',
+        'tanggal_lahir' => 'required|date',
+        'jabatan' => 'required',
+        'status_kepegawaian' => 'required',
+        'tanggal_masuk' => 'required|date',
+        'password' => 'required|min:6',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
 
-        $data = $request->all();
+    $data = $request->all();
 
-        if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('karyawan', 'public');
-        }
-
-        Karyawan::create($data);
-
-        return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan');
+    if ($request->hasFile('foto')) {
+        $data['foto'] = $request->file('foto')->store('karyawan', 'public');
     }
+
+    // Simpan ke tabel karyawans
+    $karyawan = Karyawan::create($data);
+
+    // Simpan ke tabel users
+    User::create([
+        'name' => $request->nama_lengkap,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'karyawan_id' => $karyawan->id,
+    ]);
+
+    return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan & akun login dibuat');
+}
+
 
     /**
      * Show the form for editing the specified resource.
@@ -99,12 +111,12 @@ class KaryawanController extends Controller
 
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil diperbarui');
     }
-   public function show($id)
-{
-    $karyawan = Karyawan::findOrFail($id);
+    public function show($id)
+    {
+        $karyawan = Karyawan::findOrFail($id);
 
-    return view('karyawan.show', compact('karyawan'));
-}
+        return view('karyawan.show', compact('karyawan'));
+    }
 
 
 

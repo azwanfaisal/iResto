@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'roles',
+        'karyawan_id',
     ];
 
     /**
@@ -46,4 +47,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    // di model User
+public function karyawan()
+{
+    return $this->belongsTo(Karyawan::class);
+}
+
+
 }
