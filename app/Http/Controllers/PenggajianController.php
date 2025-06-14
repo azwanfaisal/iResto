@@ -6,14 +6,25 @@ use App\Models\Penggajian;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 
 class PenggajianController extends Controller
 {
     public function index()
-    {
-        $penggajians = Penggajian::with('karyawan')->latest()->paginate(10);
-        return view('penggajians.index', compact('penggajians'));
+{
+    $user = Auth::user();
+
+    $query = Penggajian::with('karyawan');
+
+    // Jika bukan admin, hanya tampilkan data miliknya saja
+    if ($user->roles !== 'admin') {
+        $query->where('karyawan_id', $user->karyawan_id);
     }
+
+    $penggajians = $query->latest()->paginate(10);
+
+    return view('penggajians.index', compact('penggajians'));
+}
 
     public function create()
     {

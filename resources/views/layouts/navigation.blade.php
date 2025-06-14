@@ -73,6 +73,7 @@
                         </x-nav-link>
                     </div>
 
+
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('evaluasi_kinerja.index')" :active="request()->routeIs('evaluasi_kinerja.index')">
                             {{ __('Evaluasi Kinerja') }}
@@ -85,13 +86,18 @@
                         </x-nav-link>
                     </div>
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
-                            {{ __('Users Management') }}
+                        <x-nav-link :href="route('jadwalkerja.index')" :active="request()->routeIs('jadwalkerja.index')">
+                            {{ __('Jadwal Kerja') }}
                         </x-nav-link>
                     </div>
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('absensi.index')" :active="request()->routeIs('absensi.index')">
                             {{ __('Absensi') }}
+                        </x-nav-link>
+                    </div>
+                      <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('penggajian.index')" :active="request()->routeIs('penggajians.index')">
+                            {{ __('Penggajian') }}
                         </x-nav-link>
                     </div>
                 @elseif (Auth::user()->roles == 'manajer')

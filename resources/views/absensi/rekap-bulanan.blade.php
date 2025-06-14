@@ -78,12 +78,19 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center p-6 text-gray-500">Tidak ada data untuk bulan ini.
-                            </td>
+                            <td colspan="7" class="text-center p-6 text-gray-500">Tidak ada data untuk bulan ini.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Tombol Kembali -->
+        <div class="mt-6">
+            <a href="{{ route('laporans.index') }}"
+                class="inline-block px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 transition">
+                ← Kembali ke laporan
+            </a>
         </div>
     </div>
 </x-app-layout>

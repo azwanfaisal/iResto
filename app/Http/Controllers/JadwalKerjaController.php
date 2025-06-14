@@ -7,27 +7,35 @@ use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\PergantianJadwal;
+use Illuminate\Support\Facades\Auth;
+
 
 class JadwalKerjaController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = JadwalKerja::query();
+   public function index(Request $request)
+{
+    $query = JadwalKerja::query();
 
-        // Filter berdasarkan tanggal
-        if ($request->has('tanggal')) {
-            $query->where('tanggal', $request->tanggal);
-        }
-
-        // Filter berdasarkan shift
-        if ($request->has('shift') && $request->shift !== '') {
-            $query->where('shift', $request->shift);
-        }
-
-        $jadwalKerja = $query->paginate(10);
-
-        return view('jadwalkerja.index', compact('jadwalKerja'));
+    // Jika user bukan admin, filter berdasarkan karyawan_id
+    if (Auth::user()->roles !== 'admin') {
+        $karyawanId = Auth::user()->karyawan_id;
+        $query->where('karyawan_id', $karyawanId);
     }
+
+    // Filter berdasarkan tanggal
+    if ($request->has('tanggal')) {
+        $query->where('tanggal', $request->tanggal);
+    }
+
+    // Filter berdasarkan shift
+    if ($request->has('shift') && $request->shift !== '') {
+        $query->where('shift', $request->shift);
+    }
+
+    $jadwalKerja = $query->paginate(10);
+
+    return view('jadwalkerja.index', compact('jadwalKerja'));
+}
 
     public function create()
     {
@@ -35,27 +43,26 @@ class JadwalKerjaController extends Controller
         return view('jadwalkerja.create', compact('karyawans'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'karyawan_id' => 'required|exists:karyawans,id',
-            'tanggal' => 'required|date',
-            'shift' => 'required|in:pagi,siang,malam'
-        ]);
+  public function store(Request $request)
+{
+    $request->validate([
+        'tanggal' => 'required|date',
+        'shift' => 'required|in:pagi,siang,malam'
+    ]);
 
-        // Ambil data karyawan untuk mendapatkan posisi
-        $karyawan = Karyawan::findOrFail($request->karyawan_id);
+    $karyawanId = Auth::user()->karyawan_id;
+    $karyawan = Karyawan::findOrFail($karyawanId);
 
-        JadwalKerja::create([
-            'karyawan_id' => $request->karyawan_id,
-            'tanggal' => $request->tanggal,
-            'shift' => $request->shift,
-            'posisi' => $karyawan->jabatan, // Ambil posisi dari data karyawan
-            'status' => 'terjadwal'
-        ]);
+    JadwalKerja::create([
+        'karyawan_id' => $karyawanId,
+        'tanggal' => $request->tanggal,
+        'shift' => $request->shift,
+        'posisi' => $karyawan->jabatan,
+        'status' => 'terjadwal'
+    ]);
 
-        return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal berhasil dibuat!');
-    }
+    return redirect()->route('jadwalkerja.index')->with('success', 'Jadwal berhasil dibuat!');
+}
 
     public function edit(JadwalKerja $jadwalkerja)
     {

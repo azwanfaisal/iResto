@@ -1,18 +1,14 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Manajemen Karyawan | Modern Employee Management</title>
-    
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
-    
-    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
     <style>
         :root {
             --primary: #4361ee;
@@ -61,6 +57,7 @@
             position: relative;
             z-index: 50;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
         nav {
@@ -117,6 +114,8 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
         }
         
         .btn-outline {
@@ -129,17 +128,44 @@
             background-color: rgba(255, 255, 255, 0.1);
         }
         
-        /* Hero Section */
+        /* Hero Section - Posisi gambar di sebelah kanan */
         .hero {
             padding: 5rem 0;
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            min-height: 80vh;
+        }
+        
+        .hero-container {
+            display: flex;
+            align-items: center;
+            gap: 4rem;
         }
         
         .hero-content {
-            max-width: 600px;
+            flex: 1;
             position: relative;
             z-index: 10;
+        }
+        
+        .hero-image-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .hero-image {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15);
+            animation: floating 3s ease-in-out infinite;
+            position: relative;
+            z-index: 5;
+            transform: translateY(0);
         }
         
         .hero-title {
@@ -173,19 +199,14 @@
             margin-top: 2rem;
         }
         
-        .hero-image {
-            position: absolute;
-            right: -50px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 50%;
-            max-width: 600px;
-            z-index: 5;
-        }
-        
         /* Features */
         .features {
             padding: 5rem 0;
+            background-color: #f8fbff;
+        }
+        
+        .dark .features {
+            background-color: #0f172a;
         }
         
         .section-title {
@@ -387,31 +408,48 @@
         
         /* Responsive */
         @media (max-width: 1024px) {
-            .hero-image {
-                opacity: 0.3;
-                right: -100px;
+            .hero-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 2rem;
             }
             
             .hero-content {
                 max-width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            
+            .hero-subtitle {
+                max-width: 100%;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
             }
         }
         
         @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 0;
+                min-height: auto;
+            }
+            
             .hero-title {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
             }
             
-            .hero-buttons {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
+            .hero-subtitle {
+                font-size: 1.1rem;
             }
             
             .hero-image {
-                display: none;
+                max-width: 90%;
             }
             
             .section-title {
@@ -420,6 +458,14 @@
             
             .stat-number {
                 font-size: 2rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
             }
         }
         
@@ -458,13 +504,71 @@
             50% { transform: translateY(-15px); }
             100% { transform: translateY(0px); }
         }
+        
+        /* Dekorasi */
+        .circle-decor {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 0;
+        }
+        
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent));
+            opacity: 0.1;
+            top: -100px;
+            right: -100px;
+        }
+        
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            opacity: 0.1;
+            bottom: -50px;
+            left: -50px;
+        }
+        
+        .circle-3 {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            opacity: 0.1;
+            bottom: 100px;
+            right: 200px;
+        }
+        
+        /* Mode toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header class="animate__animated animate__fadeIn">
         <div class="container">
-            <nav>
+             <nav>
                 <a href="#" class="logo">
                     <span>SMK</span> Manajemen
                 </a>
@@ -472,16 +576,16 @@
                     @if (Route::has('login'))
                         @auth
                             <a href="{{ url('/dashboard') }}" class="btn btn-outline">
-                                Dashboard
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                         @else
                             <a href="{{ route('login') }}" class="btn btn-outline">
-                                Log in
+                                <i class="fas fa-sign-in-alt"></i> Log in
                             </a>
 
                             @if (Route::has('register'))
                                 <a href="{{ route('register') }}" class="btn btn-primary">
-                                    Register
+                                    <i class="fas fa-user-plus"></i> Register
                                 </a>
                             @endif
                         @endauth
@@ -491,24 +595,31 @@
         </div>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Hero Section dengan posisi gambar di kanan -->
     <section class="hero">
-        <div class="container">
+        <div class="circle-decor circle-1"></div>
+        <div class="circle-decor circle-2"></div>
+        <div class="circle-decor circle-3"></div>
+        
+        <div class="container hero-container">
             <div class="hero-content animate__animated animate__fadeIn">
                 <h1 class="hero-title">Selamat Datang di <span>Sistem Manajemen Karyawan</span></h1>
                 <p class="hero-subtitle">
-                    Kelola data karyawan, penggajian, dan absensi dengan mudah dan efisien.
+                    Kelola data karyawan, penggajian, dan absensi dengan mudah dan efisien. 
+                    Solusi terpadu untuk manajemen sumber daya manusia yang lebih baik.
                 </p>
-                <div class="hero-buttons">
+               <div class="hero-buttons">
                     <a href="{{ url('/dashboard') }}" class="btn btn-primary animate__animated animate__pulse animate__infinite">
-                        Mulai Sekarang
+                        <i class="fas fa-rocket"></i> Mulai Sekarang
                     </a>
                     <a href="#features" class="btn btn-outline">
-                        Pelajari Lebih Lanjut
+                        <i class="fas fa-book"></i> Pelajari Lebih Lanjut
                     </a>
                 </div>
             </div>
-            <img src="<?= asset('storage/karyawan/welcome.png') ?>" alt="HR Illustration" class="hero-image floating">
+            <div class="hero-image-container">
+                <img src="{{ asset('storage/karyawan/welcome.png') }}" alt="Sistem Manajemen Karyawan" class="hero-image">
+            </div>
         </div>
     </section>
 
@@ -519,9 +630,7 @@
             <div class="features-grid">
                 <div class="feature-card fade-in delay-1">
                     <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-6h-5M12 20h5v-10h-5M7 20h5V8H7M3 20h4V4H3v16z" />
-                        </svg>
+                        <i class="fas fa-users"></i>
                     </div>
                     <h3 class="feature-title">Data Karyawan</h3>
                     <p class="feature-desc">
@@ -531,9 +640,7 @@
                 
                 <div class="feature-card fade-in delay-2">
                     <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.5-2 4.5-2 6 0M12 16c-1.5 2-4.5 2-6 0m6-8V4m0 16v-4" />
-                        </svg>
+                        <i class="fas fa-money-bill-wave"></i>
                     </div>
                     <h3 class="feature-title">Penggajian</h3>
                     <p class="feature-desc">
@@ -543,9 +650,7 @@
                 
                 <div class="feature-card fade-in delay-3">
                     <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <i class="fas fa-calendar-check"></i>
                     </div>
                     <h3 class="feature-title">Absensi</h3>
                     <p class="feature-desc">
@@ -555,9 +660,7 @@
 
                 <div class="feature-card fade-in delay-3">
                     <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-7 4h8m-5-16h-3a2 2 0 00-2 2v16a2 2 0 002 2h8a2 2 0 002-2V9l-5-5z" />
-                        </svg>
+                        <i class="fas fa-chart-line"></i>
                     </div>
                     <h3 class="feature-title">Laporan</h3>
                     <p class="feature-desc">
@@ -599,6 +702,12 @@
                 <div class="footer-about">
                     <a href="#" class="footer-logo"><span>SMK</span> Manajemen</a>
                     <p>Sistem modern untuk manajemen karyawan yang membantu bisnis mengelola SDM dengan lebih efisien.</p>
+                    <div class="social-links" style="margin-top: 1rem; display: flex; gap: 1rem;">
+                        <a href="#" style="color: #b8b8b8; font-size: 1.2rem;"><i class="fab fa-facebook"></i></a>
+                        <a href="#" style="color: #b8b8b8; font-size: 1.2rem;"><i class="fab fa-twitter"></i></a>
+                        <a href="#" style="color: #b8b8b8; font-size: 1.2rem;"><i class="fab fa-instagram"></i></a>
+                        <a href="#" style="color: #b8b8b8; font-size: 1.2rem;"><i class="fab fa-linkedin"></i></a>
+                    </div>
                 </div>
                 <div class="footer-links">
                     <h3>Produk</h3>
@@ -629,10 +738,14 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; {{ date('Y') }} Sistem Manajemen Karyawan. All rights reserved.
+                &copy; 2023 Sistem Manajemen Karyawan. All rights reserved.
             </div>
         </div>
     </footer>
+
+    <button class="dark-mode-toggle" id="darkModeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
 
     <script>
         // Simple animation trigger on scroll
@@ -665,35 +778,30 @@
             window.addEventListener('scroll', fadeInOnScroll);
             
             // Dark mode toggle
-            const darkModeToggle = document.createElement('button');
-            darkModeToggle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
-            darkModeToggle.style.position = 'fixed';
-            darkModeToggle.style.bottom = '20px';
-            darkModeToggle.style.right = '20px';
-            darkModeToggle.style.background = 'var(--primary)';
-            darkModeToggle.style.color = 'white';
-            darkModeToggle.style.border = 'none';
-            darkModeToggle.style.borderRadius = '50%';
-            darkModeToggle.style.width = '40px';
-            darkModeToggle.style.height = '40px';
-            darkModeToggle.style.display = 'flex';
-            darkModeToggle.style.alignItems = 'center';
-            darkModeToggle.style.justifyContent = 'center';
-            darkModeToggle.style.cursor = 'pointer';
-            darkModeToggle.style.zIndex = '100';
-            darkModeToggle.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const icon = darkModeToggle.querySelector('i');
             
             darkModeToggle.addEventListener('click', function() {
                 document.documentElement.classList.toggle('dark');
                 const isDark = document.documentElement.classList.contains('dark');
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                
+                // Update icon
+                if (isDark) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
             });
             
-            document.body.appendChild(darkModeToggle);
-            
-            // Set initial theme
-            if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            // Set initial theme and icon
+            if (localStorage.getItem('theme') === 'dark' || 
+                (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
             }
         });
     </script>

@@ -2,109 +2,107 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Laporan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Karyawan;
+use App\Models\Absensi;
+use App\Models\Penggajian;
+use Carbon\Carbon;
+use App\Models\Laporan;
+use App\Exports\LaporansExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanController extends Controller
 {
-    public function index()
-    {
-        $laporans = Laporan::latest()->paginate(10);
-        return view('laporans.index', compact('laporans'));
+   public function index(Request $request)
+{
+    $query = Laporan::query();
+
+    // Filter berdasarkan tanggal jika tersedia
+    if ($request->filled('from') && $request->filled('to')) {
+        $query->whereBetween('periode_awal', [$request->from, $request->to]);
     }
 
-    public function create()
-    {
-        return view('laporans.create');
-    }
+    $laporans = $query->orderBy('periode_awal', 'desc')->get();
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'jenis_laporan' => 'required|in:kehadiran,penggajian,kinerja',
-            'periode_awal' => 'required|date',
-            'periode_akhir' => 'required|date|after_or_equal:periode_awal',
-            'format' => 'required|in:PDF,Excel,CSV',
-            'file' => 'nullable|file|mimes:pdf,xlsx,csv|max:2048',
-        ]);
+    return view('laporans.index', compact('laporans'));
+}
 
-        try {
-            if ($request->hasFile('file')) {
-                $validated['file_path'] = $request->file('file')->store('laporan_files');
-            }
 
-            Laporan::create($validated);
+public function store(Request $request)
+{
+    $request->validate([
+        'periode_awal' => 'required|date',
+        'periode_akhir' => 'required|date|after_or_equal:periode_awal',
+    ]);
 
-            return redirect()->route('laporans.index')
-                ->with('success', 'Laporan berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            return back()->withInput()
-                ->with('error', 'Gagal menambahkan laporan: ' . $e->getMessage());
-        }
-    }
+    // Hitung data berdasarkan periode
+    $totalKaryawan = \App\Models\Karyawan::count();
 
-    public function edit(Laporan $laporan)
-    {
-        return view('laporans.edit', compact('laporan'));
-    }
+    $totalAbsensi = \App\Models\Absensi::whereBetween('tanggal', [
+        $request->periode_awal,
+        $request->periode_akhir
+    ])->count();
 
-    public function update(Request $request, Laporan $laporan)
-    {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'jenis_laporan' => 'required|in:kehadiran,penggajian,kinerja',
-            'periode_awal' => 'required|date',
-            'periode_akhir' => 'required|date|after_or_equal:periode_awal',
-            'format' => 'required|in:PDF,Excel,CSV',
-            'file' => 'nullable|file|mimes:pdf,xlsx,csv|max:2048',
-        ]);
+    $totalPenggajian = \App\Models\Penggajian::whereBetween('tanggal_gajian', [
+        $request->periode_awal,
+        $request->periode_akhir
+    ])->sum('total_gaji');
 
-        try {
-            if ($request->hasFile('file')) {
-                // Delete old file if exists
-                if ($laporan->file_path) {
-                    Storage::delete($laporan->file_path);
-                }
-                $validated['file_path'] = $request->file('file')->store('laporan_files');
-            }
+    // Simpan ke database
+    \App\Models\Laporan::create([
+        'periode_awal' => $request->periode_awal,
+        'periode_akhir' => $request->periode_akhir,
+        'total_karyawan' => $totalKaryawan,
+        'total_absensi' => $totalAbsensi,
+        'total_penggajian' => $totalPenggajian,
+    ]);
 
-            $laporan->update($validated);
+    return redirect()->route('laporans.index')->with('success', 'Laporan berhasil disimpan.');
+}
 
-            return redirect()->route('laporans.index')
-                ->with('success', 'Laporan berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()->withInput()
-                ->with('error', 'Gagal memperbarui laporan: ' . $e->getMessage());
-        }
-    }
 
-    public function destroy(Laporan $laporan)
-    {
-        try {
-            // Delete file if exists
-            if ($laporan->file_path) {
-                Storage::delete($laporan->file_path);
-            }
 
-            $laporan->delete();
 
-            return redirect()->route('laporans.index')
-                ->with('success', 'Laporan berhasil dihapus.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menghapus laporan: ' . $e->getMessage());
-        }
-    }
+    public function simpanLaporan(Request $request)
+{
+    $awal = Carbon::parse($request->periode_awal);
+    $akhir = Carbon::parse($request->periode_akhir);
 
-    public function download(Laporan $laporan)
-    {
-        if (!$laporan->file_path || !Storage::exists($laporan->file_path)) {
-            abort(404);
-        }
+    $laporan = new Laporan();
+    $laporan->periode_awal = $awal;
+    $laporan->periode_akhir = $akhir;
+    $laporan->total_karyawan = Karyawan::count();
+    $laporan->total_absensi = Absensi::whereBetween('tanggal', [$awal, $akhir])->count();
+    $laporan->total_penggajian = Penggajian::whereBetween('tanggal_gajian', [$awal, $akhir])->sum('total_gaji');
+    $laporan->save();
 
-        return Storage::download($laporan->file_path);
-    }
+    return redirect()->route('laporans.index')->with('success', 'Laporan berhasil disimpan.');
+}
+public function exportExcel()
+{
+    return Excel::download(new LaporansExport, 'laporan.xlsx');
+}
+
+public function exportPdf()
+{
+    $laporans = \App\Models\Laporan::all();
+    $pdf = PDF::loadView('laporans.export_pdf', compact('laporans'));
+    return $pdf->download('laporan.pdf');
+}
+public function show($id)
+{
+    $laporan = Laporan::findOrFail($id);
+
+    return view('laporans.show', compact('laporan'));
+}
+public function destroy(Laporan $laporan)
+{
+    $laporan->delete();
+
+    return redirect()->route('laporans.index')
+        ->with('success', 'Laporan berhasil dihapus.');
+}
+
+
 }

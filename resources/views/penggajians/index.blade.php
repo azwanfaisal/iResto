@@ -12,10 +12,12 @@
 
                     {{-- Tombol Tambah --}}
                     <div class="mb-6 flex justify-between items-center">
-                        <a href="{{ route('penggajians.create') }}"
-                            class="inline-block px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
-                            + Tambah Penggajian
-                        </a>
+                        @if (Auth::user()->roles == 'admin')
+                            <a href="{{ route('penggajians.create') }}"
+                                class="inline-block px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
+                                + Tambah Penggajian
+                            </a>
+                        @endif
                     </div>
 
                     {{-- Tabel Penggajian --}}
@@ -80,52 +82,61 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 text-center">
-                                          <div class="flex flex-col items-center space-y-2">
-    {{-- Slip Gaji --}}
-    <a href="{{ route('penggajians.slip', $penggajian->id) }}"
-        class="flex items-center justify-center px-4 py-1.5 bg-blue-500 text-white text-sm font-semibold rounded-md hover:bg-blue-600 w-24">
-        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M6 2a1 1 0 00-1 1v14a1 1 0 001 1h8a1 1 0 001-1V7.414A1 1 0 0014.586 6L11 2.414A1 1 0 0010.586 2H6z" />
-        </svg>
-        Slip
-    </a>
+                                            <div class="flex flex-col items-center space-y-2">
 
-    {{-- Tombol Bayar --}}
-    <form action="{{ route('penggajians.bayar', $penggajian->id) }}" method="POST"
-        onsubmit="return confirm('Apakah Anda yakin ingin membayar gaji ini?')">
-        @csrf
-        @method('PUT')
-        <button type="submit"
-            class="flex items-center justify-center w-24 px-4 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2m0 0c1.1 0 2 .9 2 2s-.9 2-2 2m0-4v.01M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z" />
-            </svg>
-            Bayar
-        </button>
-    </form>
+                                                {{-- Tombol Slip Gaji --}}
+                                                <a href="{{ route('penggajians.slip', $penggajian->id) }}"
+                                                    class="flex items-center px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 text-xs"
+                                                    title="Lihat Slip Gaji">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                        viewBox="0 0 24 24" fill="currentColor">
+                                                        <path
+                                                            d="M6 2a1 1 0 00-1 1v14a1 1 0 001 1h8a1 1 0 001-1V7.414A1 1 0 0014.586 6L11 2.414A1 1 0 0010.586 2H6z" />
+                                                    </svg>
+                                                    Slip
+                                                </a>
+                                                @if (Auth::user()->roles == 'admin')
+                                                    {{-- Tombol Bayar --}}
+                                                    <form action="{{ route('penggajians.bayar', $penggajian->id) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Apakah Anda yakin ingin membayar gaji ini?');">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <button type="submit"
+                                                            class="flex items-center px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 text-xs"
+                                                            title="Bayar">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                                stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2m0 0c1.1 0 2 .9 2 2s-.9 2-2 2m0-4v.01M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z" />
+                                                            </svg>
+                                                            Bayar
+                                                        </button>
+                                                    </form>
 
-    {{-- Tombol Hapus --}}
-    <form action="{{ route('penggajians.destroy', $penggajian->id) }}" method="POST"
-        onsubmit="return confirm('Yakin ingin menghapus?')">
-        @csrf
-        @method('DELETE')
-        <button type="submit"
-            class="flex items-center justify-center w-24 px-4 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1H9a1 1 0 00-1 1v3m4-3V4m0 0h4m-4 0H7" />
-            </svg>
-            Hapus
-        </button>
-    </form>
-</div>
-
-
-
+                                                    {{-- Tombol Hapus --}}
+                                                    <form action="{{ route('penggajians.destroy', $penggajian->id) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Apakah Anda yakin menghapus data ini?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="flex items-center px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 text-xs"
+                                                            title="Hapus">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                                viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M6 2a1 1 0 00-1 1v1H3.5a.5.5 0 000 1H4v11a2 2 0 002 2h8a2 2 0 002-2V5h.5a.5.5 0 000-1H15V3a1 1 0 00-1-1H6zm1 4a.5.5 0 011 0v8a.5.5 0 01-1 0V6zm4 0a.5.5 0 011 0v8a.5.5 0 01-1 0V6z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                            Hapus
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
                                         </td>
+
                                     </tr>
                                 @empty
                                     <tr>
