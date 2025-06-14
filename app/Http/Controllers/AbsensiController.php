@@ -179,5 +179,15 @@ public function pengajuanIzinCuti(Request $request)
 
     return redirect()->route('absensi.index')->with('success', 'Pengajuan berhasil dikirim.');
 }
+public function showQrPage()
+{
+    $user = Auth::user();
+    $karyawan = $user->karyawan; // pastikan relasi karyawan tersedia
+
+    // QR code bisa berisi ID karyawan, atau custom string
+    $qrData = 'absensi-' . $karyawan->id; 
+
+    return view('absensi.qr', compact('karyawan', 'qrData'));
+}
 
 }

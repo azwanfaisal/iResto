@@ -70,7 +70,7 @@ Route::resource('laporans', LaporanController::class);
     Route::get('/absensi/pengajuan', [AbsensiController::class, 'formPengajuan'])->name('absensi.formPengajuan');
     Route::post('/absensi/pengajuan', [AbsensiController::class, 'pengajuanIzinCuti'])->name('absensi.pengajuanIzinCuti');
 
-    Route::get('/absensi/qr', [AbsensiController::class, 'qrScanner'])->name('absensi.qr');
+Route::get('/absensi/qr', [AbsensiController::class, 'showQrPage'])->name('absensi.qr');
     Route::get('/penggajians/get-gaji-data/{karyawan}', [PenggajianController::class, 'getGajiData']);
     Route::get('/penggajians/get-gaji-data/{id}', [App\Http\Controllers\PenggajianController::class, 'getGajiData']);
     Route::get('/penggajians/{id}/slip', [PenggajianController::class, 'slip'])->name('penggajians.slip');

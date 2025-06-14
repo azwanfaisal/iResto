@@ -5,7 +5,7 @@ use App\Models\User;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
+
 use Illuminate\Support\Facades\Hash;
 
 class KaryawanController extends Controller

@@ -10,34 +10,36 @@
             <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
                 <div class="py-6 px-6">
                     <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <form action="{{ route('absensi.masuk') }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit"
-                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
-                                    Absen Masuk
-                                </button>
-                            </form>
+                        @if (Auth::user()->roles == 'user')
+                            <div>
+                                <form action="{{ route('absensi.masuk') }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
+                                        Absen Masuk
+                                    </button>
+                                </form>
 
-                            <form action="{{ route('absensi.pulang') }}" method="POST" class="inline ml-2">
-                                @csrf
-                                <button type="submit"
-                                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm">
-                                    Absen Pulang
-                                </button>
-                            </form>
-                        </div>
+                                <form action="{{ route('absensi.pulang') }}" method="POST" class="inline ml-2">
+                                    @csrf
+                                    <button type="submit"
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm">
+                                        Absen Pulang
+                                    </button>
+                                </form>
+                            </div>
 
-                        <div>
-                            <a href="{{ route('absensi.qr') }}"
-                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm">
-                                📷 Scan QR Code
+                            <div>
+                                <a href="{{ route('absensi.qr') }}"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm">
+                                    📷 Scan QR Code
+                                </a>
+                            </div>
+                            <a href="{{ route('absensi.formPengajuan') }}"
+                                class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow text-sm">
+                                📝 Ajukan Izin/Sakit/Cuti
                             </a>
-                        </div>
-                        <a href="{{ route('absensi.formPengajuan') }}"
-                            class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow text-sm">
-                            📝 Ajukan Izin/Sakit/Cuti
-                        </a>
+                        @endif
                         <a href="{{ route('absensi.rekapBulanan') }}"
                             class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-sm transition">
                             📊 Rekap Absensi
