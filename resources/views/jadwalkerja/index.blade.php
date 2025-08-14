@@ -35,7 +35,7 @@
 
                         <div class="flex flex-wrap gap-2">
                              @if (Auth::user()->roles == 'admin')
-                            <a href="{{ route('jadwalkerja.create') }}"
+                            {{-- <a href="{{ route('jadwalkerja.create') }}"
                                 class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                     fill="currentColor">
@@ -44,7 +44,7 @@
                                         clip-rule="evenodd" />
                                 </svg>
                                 Jadwal Harian
-                            </a>
+                            </a> --}}
                             
                             <a href="{{ route('jadwalkerja.create-weekly') }}"
                                 class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200 flex items-center">
